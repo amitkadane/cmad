@@ -26,6 +26,10 @@ pipeline {
       }
   
       stage('package') {
+	     when {
+		     branch 'master'
+	     }
+
          steps {
 		    echo 'packaging users app'
 			dir('java/cmad-ms-users'){
