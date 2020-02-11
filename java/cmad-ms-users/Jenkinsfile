@@ -44,7 +44,7 @@ pipeline {
 		    echo 'packaging users app'
 			dir('java/cmad-ms-users'){
 			  sh 'mvn package -DSkipTests'
-			  archiveArtifacts 'java/cmad-ms-users/target/**.jar'
+			  archiveArtifacts 'target/**.jar'
               echo 'Step 2'
             }
          }
