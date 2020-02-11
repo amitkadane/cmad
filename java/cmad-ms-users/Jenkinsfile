@@ -1,52 +1,54 @@
 pipeline {
-	agent any
+   agent{
+    docker{
+       image 'maven:3.6.1-jdk-8-slim'
+       args '-v $HOME/.m2:/root/.m2'
+    }
+   }	
 
-		tools {
-			maven 'maven 3.6.1'
-		}	  
+   stages {
+      stage('build') {
+	     when {
+			 changeset pattern: "java/cmad-ms-users/**"
+	     }
 
-	stages {
-		stage('build') {
-			when {
-				changeset pattern: "java/cmad-ms-users/**"
+         steps {
+            echo 'compiling users service'
+			dir('java/cmad-ms-users'){
+			sh 'mvn compile'
 			}
+         }
+      }
+    
+  
+      stage('test') {
+	     when {
+			 changeset pattern: "java/cmad-ms-users/**"
+	     }
 
-			steps {
-				echo 'compiling users service'
-					dir('java/cmad-ms-users'){
-						sh 'mvn compile'
-					}
-			}
-		}
+         steps {
+		    echo 'running unit tests on users service'
+			dir('java/cmad-ms-users'){
+			  sh 'mvn clean test'
+            }
+         }
+      }
+  
+      stage('package') {
+	     when {
+		     branch 'master'
+			 changeset pattern: "java/cmad-ms-users/**"
+	     }
 
-
-		stage('test') {
-			when {
-				changeset pattern: "java/cmad-ms-users/**"
-			}
-
-			steps {
-				echo 'running unit tests on users service'
-					dir('java/cmad-ms-users'){
-						sh 'mvn clean test'
-					}
-			}
-		}
-
-		stage('package') {
-			when {
-				branch 'master'
-					changeset pattern: "java/cmad-ms-users/**"
-			}
-
-			steps {
-				echo 'packaging users app'
-					dir('java/cmad-ms-users'){
-						sh 'mvn package -DSkipTests'
-							archiveArtifacts 'java/cmad-ms-users/target/*.jar'
-				    }
-		    }
-	    }	 
+         steps {
+		    echo 'packaging users app'
+			dir('java/cmad-ms-users'){
+			  sh 'mvn package -DSkipTests'
+			  archiveArtifacts 'java/cmad-ms-users/target/**.jar'
+              echo 'Step 2'
+            }
+         }
+	  }	 
     }
 }
 
